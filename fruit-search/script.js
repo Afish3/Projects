@@ -67,10 +67,11 @@ window.addEventListener('keypress', (e) => {
 });
 
 function arrowSelect(e) {
-	if(e.key === 'ArrowDown'){
-		const selObj = {...[...suggSet]};
-		let counter = 0;
-		selObj[counter]
-	}
-
+  while (input.value !== "") {
+    if (e.key === "ArrowDown") {
+      const selObj = { ...[...suggSet] };
+      let counter = 0;
+      selObj[counter];
+    }
+  }
 }
