@@ -29,7 +29,7 @@ function searchHandler(e) {
 		return;
 	}
 	delList();
-	search(input.value);
+	search(input.value); 
 	presentSugg();
 }
 
