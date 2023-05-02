@@ -52,11 +52,19 @@ function putStoriesOnPage() {
   console.debug("putStoriesOnPage");
 
   $allStoriesList.empty();
-
+  let i = 0;
   // loop through all of our stories and generate HTML for them
   for (let story of storyList.stories) {
+    if(currentUser) {
+      if(currentUser.favorites[i]) {
+        if(currentUser.favorites[i].storyId.includes(story.storyId)){
+          favorites.push(story.storyId);
+        }
+      }
+    }
     const $story = generateStoryMarkup(story);
     $allStoriesList.append($story);
+    i++;
   }
 
   $allStoriesList.show();
