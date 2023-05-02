@@ -45,6 +45,8 @@ function hidePageComponents() {
 async function start() {
   console.debug("start");
 
+  $('.nav-left').hide();
+
   // "Remember logged-in user" and log in, if credentials in localStorage
   await checkForRememberedUser();
   await getAndShowStoriesOnStart();

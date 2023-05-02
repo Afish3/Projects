@@ -33,6 +33,7 @@ function updateNavOnLogin() {
   $navLogin.hide();
   $navLogOut.show();
   $navUserProfile.text(`${currentUser.username}`).show();
+  $('.nav-left').show();
 }
 
 function navAddStoryClick() {
@@ -78,4 +79,3 @@ function showUserStories(){
 }
 
 $body.on('click', '#nav-my-stories', showUserStories);
-
