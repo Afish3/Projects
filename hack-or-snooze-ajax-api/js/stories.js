@@ -40,9 +40,10 @@ function generateStoryMarkup(story) {
           ${story.title}
         </a>
         <small class="story-hostname">(${hostName})</small>
-        <small class="story-author">by ${story.author}</small>
+        <small class="story-author">by <b>${story.author}</b></small>
         <small class="story-user">posted by ${story.username}</small>
       </li>
+      <hr>
     `);
 }
 

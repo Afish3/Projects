@@ -3,6 +3,7 @@
 body {
   font-family: Arimo, sans-serif;
   margin: 8px 7.5vw;
+  background: radial-gradient(#e66465, #9198e5 80%);
 }
 
 h1 {
@@ -38,6 +39,7 @@ a:hover {
   flex-direction: column;
   align-self: center;
   background-color: #f6f6ef;
+  overflow: auto;
 }
 
 .hidden {
@@ -46,6 +48,10 @@ a:hover {
 
 
 /* Forms */
+
+.account-forms-container {
+  /* height: 60vh; */
+}
 
 form {
   display: flex;
