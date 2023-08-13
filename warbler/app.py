@@ -12,7 +12,7 @@ CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
-# Get DB_URI from environ variable (useful for production/testing) or,
+# Get DB_URI from environ variable or,
 # if not set there, use development local db.
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
@@ -53,6 +53,10 @@ def do_logout():
     if CURR_USER_KEY in session:
         del session[CURR_USER_KEY]
 
+def authenticate_user(user):
+    if not user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -159,12 +163,11 @@ def users_show(user_id):
 def show_likes(user_id):
     """Show users liked posts."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     user = User.query.get_or_404(user_id)
     session['RECENT_URL'] = f'/users/{user_id}/likes'
+
     liked_messages = (Message
                 .query
                 .filter(Message.id.in_(message.id for message in user.likes))
@@ -177,9 +180,7 @@ def show_likes(user_id):
 def show_following(user_id):
     """Show list of people this user is following."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
@@ -189,9 +190,7 @@ def show_following(user_id):
 def users_followers(user_id):
     """Show list of followers of this user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
@@ -201,9 +200,7 @@ def users_followers(user_id):
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -216,9 +213,7 @@ def add_follow(follow_id):
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     followed_user = User.query.get(follow_id)
     g.user.following.remove(followed_user)
@@ -228,11 +223,12 @@ def stop_following(follow_id):
 
 @app.route("/users/add_like/<int:msg_id>", methods=["POST"])
 def add_like(msg_id):
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    """Allow a user to like and unlike a message"""
+
+    authenticate_user(g.user)
     
     msg = Message.query.get_or_404(msg_id)
+
     if msg in g.user.likes:
         g.user.likes.remove(msg)
         db.session.commit()
@@ -246,9 +242,8 @@ def add_like(msg_id):
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
     """Update profile for current user."""
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+
+    authenticate_user(g.user)
 
     form = UserEditForm()
     if form.validate_on_submit():
@@ -277,9 +272,7 @@ def profile():
 def delete_user():
     """Delete user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     do_logout()
 
@@ -299,9 +292,7 @@ def messages_add():
     Show form if GET. If valid, update message and redirect to user page.
     """
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     form = MessageForm()
 
@@ -327,14 +318,11 @@ def messages_show(message_id):
 def messages_destroy(message_id):
     """Delete a message."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    authenticate_user(g.user)
 
     msg = Message.query.get(message_id)
     db.session.delete(msg)
     db.session.commit()
-    # session['RECENT_URL'] = f'/users/{g.user.id}'
 
     return redirect(f"/users/{g.user.id}")
 
@@ -350,7 +338,9 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
     """
+    # Added current path to session to have state when liking/unliking messages redirects
     session['RECENT_URL'] = '/'
+
     if g.user:
         messages = (Message
                     .query
@@ -367,9 +357,6 @@ def homepage():
 
 ##############################################################################
 # Turn off all caching in Flask
-#   (useful for dev; in production, this kind of stuff is typically
-#   handled elsewhere)
-#
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
 
 @app.after_request
