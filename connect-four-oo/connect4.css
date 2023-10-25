@@ -1,3 +1,14 @@
+body {
+  text-align: center;
+  padding: 5rem;
+}
+
+#game {
+  display: flex;
+  justify-content: center;
+  padding: 5rem;
+}
+
 /* game board table */
 
 #board td {
